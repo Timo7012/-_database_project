@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+FILE* open_file(const char* argv[]);
+
+int main(int argc, char* argv[]) {
+
+    if (argc == 1){
+        error_code(2);
+    } else{
+        FILE* data_base = open_file(argv[argc-1]);
+        for (int i=1; i<(argc-1);++i) // Processing of parameters
+    }
+
+
+
+    return 0;
+}
+
+
+
+void help() {
+    printf("*Commands*\n");
+    printf("_________________________________________________________________\n");
+    printf("add_book                  Add book to library\n");
+    printf("del_book                  Delete book from library\n");
+    printf("get_book                  Get book from library\n");
+    printf("bring_book                Adds count of book to library\n\n");
+    printf("----------Example for initializing programme--------\n");
+    printf("Project_database your_file.csv \n");
+    printf("----------Example for initializing programme--------\n\n");
+    printf("_________________________________________________________________");
+};
+
+
+
+void error_code (int a){
+
+    switch  (a) {
+        case 1 : printf("File not be opened\n"); exit(0);
+
+        case 2 : printf("File not indicated\n"); help(); exit(0);
+
+        case 3 : printf("File not be opened\n"); exit(0);
+
+        case 4 : printf("File not be opened\n"); exit(0);
+
+        case 5 : printf("File not be opened\n"); exit(0);
+    }
+}
+
+FILE* open_file(const char* argv[]){
+    FILE* file_thread;
+    if ((file_thread = (argv[0],"r");)==NULL) {
+        error_code(1);
+    }
+}
+
