@@ -22,22 +22,21 @@ int main(int argc, char* argv[]) {
 void help() {
     printf("*Commands*\n");
     printf("_________________________________________________________________\n");
-    printf("add_book                  Add book to library\n"); 
-    printf("del_book                  Delete book from library\n");
-    printf("get_book                  Get book from library and adds book to student\n");
-    printf("bring_book                Adds count of book to library and delete book from student\n");
-    printf("list_book                Adds count of book to library\n"); // sorted ny ISBN
-    printf("change_count_book_isbn             Adds count of book to library by ISBN \n");
-    printf("backup                Save the data of library in backup file\n");
-    printf("open_backup               Adds count of book to library\n");
-    printf("search_book_author                Search books by athor surname\n");
-    printf("exit_library                Save and close file of library\n\n");
+    printf("add_book                                   Add book to library\n"); 
+    printf("del_book                                   Delete book from library\n");
+    printf("get_book                                   Get book from library and adds book to student\n");
+    printf("bring_book                                 Adds count of book to library and delete book from student\n");
+    printf("list_book                                  Shows all books in library\n"); // sorted ny ISBN
+    printf("change_count_book_isbn                     Change count of book to library by ISBN \n");
+    printf("backup                                     Save the data of library in backup file\n");
+    printf("open_backup                                Open backup version of library\n");
+    printf("search_book_author                         Search books by athor surname\n");
+    printf("exit_library                               Save and close file of library\n\n");
     printf("----------Example for initializing programme--------\n");
     printf("Project_database your_file.csv \n");
     printf("----------Example for initializing programme--------\n\n");
     printf("_________________________________________________________________");
 };
-
 
 
 void error_code (int a){
