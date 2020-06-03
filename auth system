@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <conio.h>
+#include <time.h>
+
+
+
+
+
+
+int main() {
+    printf("-----------Authorizathion-----------");
+
+    printf("Enter your login");
+
+    printf("Enter your password");
+
+    FILE* fth_log;
+    fopen("filelog.log","w");
+
+
+
+    return 0;
+}
+
+
+
+
+/*
+int word_length (char ch) {
+    int length = 0;
+    char buf;
+    for(; (buf!=getchar()) != ch; ++length);
+    return length;
+} // ch - our separator symbol
+
+char* dynstring (char ch) {
+    int length = word_length(ch);
+    char* word = (char*)malloc((length+1) * sizeof(char));
+    for(int i=0;i<length+1;++i){
+        freopen();
+    }
+
+}
+ */
+
+
+
+
+char *dynstring() {
+    int *l = 0;
+    int size = 1;
+    char *string = (char*) malloc(size * sizeof(char));
+    char ch = getchar();
+    while (ch != '\n') {
+        string[(*l)++] = ch;
+        if (*l >= size) {
+            size *= 2;
+            string = (char*) realloc(string, size * sizeof(char));
+        }
+        ch = getchar();
+    }
+    string[*l] = '\0';
+    return string;
+}
+
+
+
+void logger(FILE* fth, int code, char chcode){
+
+    switch (code) {
+        case 1: fprintf(fth, "%s\n", chcode); break;
+        case 2: fprintf(fth, "%s\n", chcode); break;
+        case 3: fprintf(fth, "%s\n", chcode); break;
+
+        case : fprintf(fth, "%s\n", chcode); break;
+        case : fprintf(fth, "%s\n", chcode); break;
+        case : fprintf(fth, "%s\n", chcode); break;
+        case : fprintf(fth, "%s\n", chcode); break;
+        case : fprintf(fth, "%s\n", chcode); break;
+
+
+
+
+    }
+
+}
+
+
+// CH_CODES
+
+// Enter into the library !!!
+// Add's book to the library
+// Delete's book from the library
+// Edit's book in library
+// Lists books
+// Search book by author surname
+// Change count of books by ISBN
+// Backups the library
+// Open library backup
+// Exit from library
+// Get book from library
+// Bring book in library
+
+
+char* timeinf(){
+    const time_t timer = time(NULL) + 3600*3;
+    char* tm =(char*)malloc(20*sizeof(char));
+    time_t timeinf = localtime(&timer);
+    strftime (tm,20,"%d.%m.%Y %X.",timeinf);
+    //printf("%s\n",buffer);
+    return tm;
+}
+//fprintf(fth, "%s\n", tm);
