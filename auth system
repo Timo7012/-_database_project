@@ -1,26 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <conio.h>
 #include <time.h>
 
+void logger(FILE*, int, char*);
 
-
-
+char* dynstring(char);
 
 
 int main() {
+    FILE* fth = fopen("login.txt","r");
+    if(fth == NULL){
+        //error
+        return  0;
+    }
+    char rights=0;
     printf("-----------Authorizathion-----------");
-
     printf("Enter your login");
-
+    char* login=dynstring('\n');
     printf("Enter your password");
-
-    FILE* fth_log;
-    fopen("filelog.log","w");
-
-
-
+    char* password = dynstring('\n');
+    char temp = '0';
+    while(temp != EOF) {
+        int i=0;
+        for (; (temp = fgetc(fth)) != ';' && login[i] !='\0' && login[i] == temp; ++i) ;
+        if (login[i] == '\0' && temp == ';') {
+            i=0;
+            for (; (temp = fgetc(fth)) != ';' && password[i] !='\0' && password[i] == temp; ++i) ;
+            if (password[i] == '\0' && temp == ';') {
+                rights = (fgetc(fth) -'0' ) << 1;
+                fgetc(fth);
+                rights += fgetc(fth) -'0';
+                break;
+            } else {
+                //error
+            }
+        } else {
+            while ((temp = fgetc(fth)) != '\n' && temp != EOF);
+        }
+    }
+    if (!rights){
+        //error
+        return 0;
+    }
+    // rights in template
+    fclose(fth);
+    FILE* fth_log = fopen("filelog.log","w+");
+    logger(fth_log,0,login);
     return 0;
 }
 
@@ -48,12 +73,12 @@ char* dynstring (char ch) {
 
 
 
-char *dynstring() {
+char* dynstring(char c) {
     int *l = 0;
     int size = 1;
     char *string = (char*) malloc(size * sizeof(char));
     char ch = getchar();
-    while (ch != '\n') {
+    while (ch != c) {
         string[(*l)++] = ch;
         if (*l >= size) {
             size *= 2;
@@ -65,37 +90,39 @@ char *dynstring() {
     return string;
 }
 
+char* timeinf();
 
-
-void logger(FILE* fth, int code, char chcode){
-
+void logger(FILE* fth, int code, char* login){
+    char* time = timeinf();
+    fprintf(fth, "{\t\"time\" = %s\";\t\"login\" = \"%s\";\t\"operation\" = \"", time,login);
     switch (code) {
-        case 1: fprintf(fth, "%s\n", chcode); break;
-        case 2: fprintf(fth, "%s\n", chcode); break;
-        case 3: fprintf(fth, "%s\n", chcode); break;
-
-        case : fprintf(fth, "%s\n", chcode); break;
-        case : fprintf(fth, "%s\n", chcode); break;
-        case : fprintf(fth, "%s\n", chcode); break;
-        case : fprintf(fth, "%s\n", chcode); break;
-        case : fprintf(fth, "%s\n", chcode); break;
-
-
-
-
+        case 0:  fputs("Entered in the library\"\n}",fth);  break; //Auth accepted
+        case 1:  fputs("Add book to the library \"\n}",fth); break;
+        case 2:  fputs("Delete's book from the library\"\n}",fth); break;
+        case 3:  fputs("Edit's book in library\"\n}",fth); break;
+        case 4:  fputs("Lists books\"\n}",fth); break;
+        case 5:  fputs("Search books by author surname\"\n}",fth); break;
+        case 6:  fputs("Change count of books by ISBN\"\n}",fth); break;
+        case 7:  fputs("Backups the library\"\n}",fth); break;
+        case 8:  fputs("Open library backup\"\n}",fth); break;
+        case 9:  fputs("Exit from library\"\n}",fth); break;
+        case 10: fputs("Get book from library\"\n}",fth); break;
+        case 11: fputs("Bring book in library\"\n}",fth); break;
+        default: /*error()*/break;
     }
-
+    fprintf(fth, "\"\n}");
+    free(time);
 }
-
+//fputs("\entered in the library"\n}",fth); break;
 
 // CH_CODES
 
-// Enter into the library !!!
+// Enter into the library !!! *done*
 // Add's book to the library
 // Delete's book from the library
 // Edit's book in library
 // Lists books
-// Search book by author surname
+// Search books by author surname
 // Change count of books by ISBN
 // Backups the library
 // Open library backup
@@ -112,4 +139,8 @@ char* timeinf(){
     //printf("%s\n",buffer);
     return tm;
 }
+
 //fprintf(fth, "%s\n", tm);
+
+
+
