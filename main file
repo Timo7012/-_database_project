@@ -48,7 +48,7 @@ void error_code (int a){
 
         case 3 : printf("Logger error\n"); exit(0);
 
-        case 4 : printf("File not be opened\n"); exit(0);
+        case 4 : printf("Wrong login or password\n"); exit(0);
 
         case 5 : printf("File not be opened\n"); exit(0);
     }
