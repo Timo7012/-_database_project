@@ -46,7 +46,7 @@ void error_code (int a){
 
         case 2 : printf("File not indicated\n"); help(); exit(0);
 
-        case 3 : printf("File not be opened\n"); exit(0);
+        case 3 : printf("Logger error\n"); exit(0);
 
         case 4 : printf("File not be opened\n"); exit(0);
 
