@@ -1,0 +1,178 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+struct book_node{
+    char* author;
+    char* name_of_book;
+    int all;
+    int available;
+} ;
+
+struct node{
+    int isbn;
+    struct book_node* content;
+    struct node* next;
+};
+
+typedef struct node snode;
+
+snode* root = NULL;
+
+void clear_snode(snode* node){
+    free(node->content->author);
+    free(node->content->name_of_book);
+    free(node->content);
+    free(node);
+}
+
+char* dynstring(char c) {
+    int l = 0;
+    int size = 1;
+    char *string = (char*)malloc(size * sizeof(char));
+    char ch = getchar();
+    while (ch != c) {
+        string[(l)++] = ch;
+        if (l >= size) {
+            size *= 2;
+            string = (char*)realloc(string, size * sizeof(char));
+        }
+        ch = getchar();
+    }
+    string[l] = ',';
+    return string;
+}
+
+
+void add(snode* current,int isbn,struct book_node* content){
+    if (current->next == NULL && isbn != current->isbn){
+        current->next = (snode*)malloc(sizeof(snode));
+        current->next->isbn = isbn;
+        current->next->next = NULL;
+        current->next->content = content;
+    } else {
+        if (isbn != current->isbn){
+            add(current->next, isbn, content);
+        } else {
+            current->content = content;
+        }
+    }
+}
+
+void add_first(snode* current,int isbn, struct book_node* content){
+    if (current == NULL){
+        root = (snode*)malloc(sizeof(snode));
+        root->isbn = isbn;
+        root->next = NULL;
+        root->content = content;
+    } else if (isbn != current->isbn){
+        add(current, isbn, content);
+    } else {
+        current->content = content;
+    }
+}
+
+void del(snode* current,int isbn){
+    if (isbn != current->next->isbn){
+        del(current->next,isbn);
+    }
+    snode* temp = current->next;
+    current->next = current->next->next;
+    free(temp);
+}
+
+void del_first(snode* current,int isbn){
+    if(current->isbn != isbn){
+        del(current,isbn);
+    } else {
+        snode* temp = current->next;
+        free(current);
+        root = temp;
+    }
+}
+
+void list(snode* current,FILE* fth){
+    if (current == NULL){
+        return;
+    }
+    if (fth == NULL){
+        return; //error
+    }
+
+    fprintf(fth,"%d\n",current->isbn);
+    list(current->next, fth);
+}
+
+
+snode* find(snode* current,int isbn){
+    if (current == NULL){
+        return NULL; //error
+    }
+    if (isbn == current->isbn){
+        return current;
+    }
+    return find(current->next,isbn);
+}
+
+
+snode* find_by_author(snode* current,char* author){
+    if (current == NULL){
+        return NULL; //error
+    }
+    if (!(strcmp(author ,current->content->author))){
+        return current;
+    }
+    return find_by_author(current->next, author);
+}
+
+//--book
+void give_book(snode* current, int isbn){
+    if (current == NULL){
+        return; //error
+    }
+    current = find(current,isbn);
+    if (current -> content -> available != 0){
+        --current -> content -> available;
+    } else
+        printf("Out of books");// error
+}
+
+//++book
+void bring_book (snode* current, int isbn){
+    if (current == NULL){
+        return; //error
+    }
+    current = find(current,isbn);
+    ++current -> content -> available;
+}
+
+void edit_book(){
+    printf("Welcome to Edit Menu\n");
+    printf("write:\n");
+    printf("isbn\n");
+    printf("name of column\n");
+    printf("value\n");
+    int isbn = atoi(dynstring('\n'));
+    char* cell = dynstring('\n');
+    char* value = dynstring('\n');
+    snode* curr=find(root,isbn);
+    if (!strcmp("author", cell)){
+        free(curr->content->author);
+        curr->content->author = value;
+    } else if  (!strcmp("name of book", cell)) {
+        free(curr->content->name_of_book);
+        curr->content->name_of_book = value;
+    } else if (!strcmp("all count", cell)) {
+        curr->content->all = atoi(value);
+    } else if (!strcmp("available", cell)) {
+        curr->content->available = atoi(value);
+    }
+
+}
+
+
+
+
+int main() {
+    
+}
