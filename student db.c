@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<time.h>
 
 struct student_node{
     char* surname;
@@ -20,6 +21,23 @@ typedef struct node snode;
 
 snode* root = NULL;
 
+char* dynstring(char c) {
+    int l = 0;
+    int size = 1;
+    char *string = (char*) malloc(size * sizeof(char));
+    char ch = getchar();
+    while (ch != c) {
+        string[(l)++] = ch;
+        if (l >= size) {
+            size *= 2;
+            string = (char*) realloc(string, size * sizeof(char));
+        }
+        ch = getchar();
+    }
+    string[l] = '\n';
+    return string;
+}
+
 void clear_snode_st(snode* node){
     free(node->content->surname);
     free(node->content->name);
@@ -31,36 +49,30 @@ void clear_snode_st(snode* node){
     free(node);
 }
 
-char* dynstring(char c) {
-    int l = 0;
-    int size = 1;
-    char *string = (char*)malloc(size * sizeof(char));
-    char ch = getchar();
-    while (ch != c) {
-        string[(l)++] = ch;
-        if (l >= size) {
-            size *= 2;
-            string = (char*)realloc(string, size * sizeof(char));
-        }
-        ch = getchar();
-    }
-    string[l] = ',';
-    return string;
+
+
+char* timeinf(){
+    const time_t timer = time(NULL) + 3600*3;
+    char* tm =(char*)malloc(20*sizeof(char));
+    struct tm* timeinf = localtime(&timer);
+    strftime (tm,20,"%d.%m.%Y %X.",timeinf);
+    //printf("%s\n",buffer);
+    return tm;
 }
 
 
 void add(snode* current,char* number,struct student_node* content){
-    if(strcmp(number,current->next->number)<0){
+    if (current->next == NULL ){
+        current->next = (snode*)malloc(sizeof(snode));
+        current->next->number = number;
+        current->next->next = NULL;
+        current->next->content = content;
+    } else if(strcmp(number,current->next->number)<0){
         snode* temp = (snode *)malloc(sizeof(snode));
         temp->number=number;
         temp->content = content;
         temp->next = current->next;
         current->next = temp;
-    } else if (current->next == NULL && !strcmp(number,current->number)){
-        current->next = (snode*)malloc(sizeof(snode));
-        current->next->number = number;
-        current->next->next = NULL;
-        current->next->content = content;
     } else {
         if (strcmp(number,current->number)){
             add(current->next, number, content);
@@ -124,12 +136,21 @@ void list(snode* current,FILE* fth){
     list(current->next, fth);
 }
 
+void base_out(snode* current){
+    fprintf(stdout,"%s;",current->number);
+    fprintf(stdout,"%s;",current->content->name);
+    fprintf(stdout,"%s;",current->content->surname);
+    fprintf(stdout,"%s;",current->content->patronym);
+    fprintf(stdout,"%s;",current->content->facility);
+    fprintf(stdout,"%s\n",current->content->department);
+};
+
 snode* find(snode* current,char* number){
     if (current == NULL){
         return NULL; //error
     }
     if (!strcmp(number,current->number)){
-        return current;
+        base_out(current);
     }
     return find(current->next,number);
 }
@@ -139,7 +160,7 @@ snode* find_by_surname(snode* current,char* surname){
         return NULL; //error
     }
     if (!(strcmp(surname ,current->content->surname))){
-        return current;
+        base_out(current);
     }
     return find_by_surname(current->next, surname);
 }
@@ -156,10 +177,7 @@ void edit_book(){
     char* cell = dynstring('\n');
     char* value = dynstring('\n');
     snode* curr=find(root,number);
-    if(!strcmp("number", cell)){
-        free(curr->number);
-        curr->number = value;
-    } else if (!strcmp("name", cell)){
+    if (!strcmp("name", cell)){
         free(curr->content->name);
         curr->content->name = value;
     } else if  (!strcmp("surname", cell)) {
@@ -175,7 +193,7 @@ void edit_book(){
         free(curr->content->department);
         curr->content->department = value;
     } else {
-        //10/5 chertovikh errorov
+        // 10/5 chertovikh errorov
     }
 
 }
@@ -238,7 +256,7 @@ void backup_out(){
         fputc(ch, fth2);
     }
     fputc(EOF,fth2);
-    printf("\nBackup successful recover %s");
+    printf("\nBackup successful recover");
     fclose(fth1);
     fclose(fth2);
 }
@@ -247,7 +265,43 @@ void backup_out(){
 
 
 
-int main() {
+int main(){
 
+    struct student_node* cont = (struct student_node*) malloc(sizeof(struct student_node));
+    cont -> name= "timo" ;
+    cont -> surname="mahmudov";
+    cont -> patronym = "naz";
+    cont -> department="IU";
+    cont -> facility="IU4";
+    add_first(root,"19U254",cont);
+    cont = (struct student_node*) malloc(sizeof(struct student_node));
+    cont -> name= "ktimo" ;
+    cont -> surname="mahmudov";
+    cont -> patronym = "naz";
+    cont -> department="IU";
+    cont -> facility="IU4";
+    cont = (struct student_node*) malloc(sizeof(struct student_node));
+    add_first(root,"19U251",cont);
+    cont -> name= "ktimo" ;
+    cont -> surname="mahmudov";
+    cont -> patronym = "naz";
+    cont -> department="IU";
+    cont -> facility="IU4";
+    add_first(root,"19U256",cont);
+    cont = (struct student_node*) malloc(sizeof(struct student_node));
+    cont -> name= "ktimo" ;
+    cont -> surname="mahmudov";
+    cont -> patronym = "naz";
+    cont -> department="IU";
+    cont -> facility="IU4";
+    add_first(root,"19U255",cont);
+    list(root,stdout);
+    putchar('\n');
+    del_first(root,"19U254");
+    list(root,stdout);
+    putchar('\n');
+    find(root,"19U251");
+    putchar('\n');
+    find_by_surname(root,"mahmudov");
 }
 
