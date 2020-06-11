@@ -21,6 +21,27 @@ typedef struct node snode;
 
 snode* root = NULL;
 
+char* fdynstring(FILE* fp, char ch){
+    int l = 0;
+    char buf;
+    for(;(buf = fgetc(fp)) != ch && buf != EOF; ++l);
+    if (buf == EOF)
+        fseek(fp, -1*(l), SEEK_CUR);
+    else if (buf =='\n')
+        fseek(fp, -1*(l+2), SEEK_CUR);
+    else
+        fseek(fp, -1*(l+1), SEEK_CUR);
+    char* a = (char*)malloc((l + 1) * sizeof(char));
+    for (int i = 0; i < l; ++i)
+        a[i]=fgetc(fp);
+    a[l] = '\0';
+    if (buf != EOF)
+        fgetc(fp);
+    else
+        fseek(fp, -1, 2);
+    return a;
+}
+
 char* dynstring(char c) {
     int l = 0;
     int size = 1;
@@ -34,16 +55,17 @@ char* dynstring(char c) {
         }
         ch = getchar();
     }
-    string[l] = '\n';
+    string[l] = '\0';
     return string;
 }
 
 void clear_snode_st(snode* node){
-    free(node->content->surname);
-    free(node->content->name);
-    free(node->content->patronym);
-    free(node->content->facility);
-    free(node->content->department);
+    printf("%s",node->content->surname);
+    //free(node->content->surname);
+    //free(node->content->name);
+    //free(node->content->patronym);
+    //free(node->content->facility);
+    //free(node->content->department);
     free(node->number);
     free(node->content);
     free(node);
@@ -53,9 +75,9 @@ void clear_snode_st(snode* node){
 
 char* timeinf(){
     const time_t timer = time(NULL) + 3600*3;
-    char* tm =(char*)malloc(20*sizeof(char));
+    char* tm =(char*)malloc(21*sizeof(char));
     struct tm* timeinf = localtime(&timer);
-    strftime (tm,20,"%d.%m.%Y %X.",timeinf);
+    strftime (tm,21,"%d_%m_%Y_%H.%M.%S.",timeinf);
     //printf("%s\n",buffer);
     return tm;
 }
@@ -74,7 +96,7 @@ void add(snode* current,char* number,struct student_node* content){
         temp->next = current->next;
         current->next = temp;
     } else {
-        if (strcmp(number,current->number)){
+        if (strcmp(number,current->next->number)){
             add(current->next, number, content);
         } else {
             current->content = content;
@@ -119,6 +141,21 @@ void del_first(snode* current,char* number){
         root = temp;
     }
 }
+
+
+void delfull(snode* current){
+    if (current == NULL){
+        return;
+    }
+    snode* next = current->next;
+    clear_snode_st(current);
+    delfull(next);
+}
+void delfullfirst(snode* current){
+    delfull(current);
+    root = NULL;
+}
+
 
 void list(snode* current,FILE* fth){
     if (current == NULL){
@@ -208,7 +245,8 @@ void backup(){
     strcat(filename,flnm);
     strcat(filename,book);
     strcat(filename,tmt);
-    FILE* fth1 = fopen(filename,"w+");
+    strcat(filename,"csv");
+    FILE* fth1 = fopen(filename,"w");
     list(root,fth1);
     FILE* fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\Backups.txt","a+");
     fputs(filename,fth2);
@@ -225,24 +263,22 @@ void backup_out(){
         //error
     }
     char ch;
-    while((ch = getc(fth)) == EOF){
+    while((ch = getc(fth)) != EOF){
         putchar(ch);
     }
     fclose(fth);
     char* string = dynstring('\n');
-    char* way = "C:\\Users\\Timur\\Desktop\\Backups\\";
+    char* way = "C:\\Users\\Timur\\Desktop\\Database\\Backups\\";
     char* str_bck = calloc(strlen(way) + strlen(string) + 1, 1);
     strcat(str_bck,way);
     strcat(str_bck,string);
     FILE *fth1, *fth2;
     // Open one file for reading
     fth1 = fopen(str_bck, "r");
-    if (fth1 == NULL)
-    {
+    if (fth1 == NULL){
         printf("Cannot open file %s \n", str_bck);
         //error(0);
     }
-
     // Open another file for writing
     fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Students.csv", "w");
     if (fth2 == NULL)
@@ -251,12 +287,23 @@ void backup_out(){
         //error();
     }
     // Read contents from file
-    while ((ch = fgetc(fth1)) != EOF)
-    {
+    while ((ch = fgetc(fth1)) != EOF) {
         fputc(ch, fth2);
     }
     fputc(EOF,fth2);
-    printf("\nBackup successful recover");
+    fseek(fth1,0,0);
+    while(fgetc(fth1)!= EOF){
+        fseek(fth1,-1,1);
+        struct student_node* cont = (struct student_node*)malloc(sizeof(struct student_node));
+        char* number = fdynstring(fth1,';');
+        cont->surname = fdynstring(fth1,';');
+        cont->name = fdynstring(fth1,';');
+        cont->patronym = fdynstring(fth1,';');
+        cont->facility = fdynstring(fth1,';');
+        cont->department = fdynstring(fth1, '\n');
+        add_first(root,number,cont);
+    }
+    printf("\nBackup successful recover\n");
     fclose(fth1);
     fclose(fth2);
 }
@@ -266,7 +313,7 @@ void backup_out(){
 
 
 int main(){
-
+   // backup_out();
     struct student_node* cont = (struct student_node*) malloc(sizeof(struct student_node));
     cont -> name= "timo" ;
     cont -> surname="mahmudov";
@@ -297,11 +344,12 @@ int main(){
     add_first(root,"19U255",cont);
     list(root,stdout);
     putchar('\n');
-    del_first(root,"19U254");
+    delfullfirst(root);
+    /*del_first(root,"19U251");
     list(root,stdout);
     putchar('\n');
-    find(root,"19U251");
+    find(root,"19U256");
     putchar('\n');
-    find_by_surname(root,"mahmudov");
+    find_by_surname(root,"mahmudov");*/
+    //backup();
 }
-
