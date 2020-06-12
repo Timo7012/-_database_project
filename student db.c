@@ -1,7 +1,8 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+#include <time.h>
 
 struct student_node{
     char* surname;
@@ -60,12 +61,11 @@ char* dynstring(char c) {
 }
 
 void clear_snode_st(snode* node){
-    printf("%s",node->content->surname);
-    //free(node->content->surname);
-    //free(node->content->name);
-    //free(node->content->patronym);
-    //free(node->content->facility);
-    //free(node->content->department);
+    free(node->content->surname);
+    free(node->content->name);
+    free(node->content->patronym);
+    free(node->content->facility);
+    free(node->content->department);
     free(node->number);
     free(node->content);
     free(node);
@@ -74,7 +74,7 @@ void clear_snode_st(snode* node){
 
 
 char* timeinf(){
-    const time_t timer = time(NULL) + 3600*3;
+    const time_t timer = time(NULL);
     char* tm =(char*)malloc(21*sizeof(char));
     struct tm* timeinf = localtime(&timer);
     strftime (tm,21,"%d_%m_%Y_%H.%M.%S.",timeinf);
@@ -123,6 +123,24 @@ void add_first(snode* current,char* number, struct student_node* content){
     }
 }
 
+void add_student(){
+    struct student_node* temp = (struct student_node*)malloc(sizeof(struct student_node));
+    printf("Type number of student's book:");
+    char* number = dynstring('\n');
+    printf("Type surname:");
+    temp->surname = dynstring('\n');
+    printf("Type name:");
+    temp->name = dynstring('\n');
+    printf("Type patronym:");
+    temp->patronym = dynstring('\n');
+    printf("Type facility:");
+    temp->facility = dynstring('\n');
+    printf("Type name of department:");
+    temp->department = dynstring('\n');
+    putchar('\n');
+    add_first(root,number,temp);
+}
+
 void del(snode* current,char* number){
     if (strcmp(number,current->next->number)){
         del(current->next,number);
@@ -156,6 +174,14 @@ void delfullfirst(snode* current){
     root = NULL;
 }
 
+void base_out(snode* current,FILE* fth){
+    fprintf(fth,"%s;",current->number);
+    fprintf(fth,"%s;",current->content->surname);
+    fprintf(fth,"%s;",current->content->name);
+    fprintf(fth,"%s;",current->content->patronym);
+    fprintf(fth,"%s;",current->content->facility);
+    fprintf(fth,"%s\n",current->content->department);
+};
 
 void list(snode* current,FILE* fth){
     if (current == NULL){
@@ -164,30 +190,24 @@ void list(snode* current,FILE* fth){
     if (fth == NULL){
         return; //error
     }
+    //base_out(current,fth);
     fprintf(fth,"%s;",current->number);
-    fprintf(fth,"%s;",current->content->name);
     fprintf(fth,"%s;",current->content->surname);
+    fprintf(fth,"%s;",current->content->name);
     fprintf(fth,"%s;",current->content->patronym);
     fprintf(fth,"%s;",current->content->facility);
     fprintf(fth,"%s\n",current->content->department);
     list(current->next, fth);
 }
 
-void base_out(snode* current){
-    fprintf(stdout,"%s;",current->number);
-    fprintf(stdout,"%s;",current->content->name);
-    fprintf(stdout,"%s;",current->content->surname);
-    fprintf(stdout,"%s;",current->content->patronym);
-    fprintf(stdout,"%s;",current->content->facility);
-    fprintf(stdout,"%s\n",current->content->department);
-};
 
 snode* find(snode* current,char* number){
     if (current == NULL){
         return NULL; //error
     }
     if (!strcmp(number,current->number)){
-        base_out(current);
+        base_out(current,stdout);
+        return current;
     }
     return find(current->next,number);
 }
@@ -197,23 +217,23 @@ snode* find_by_surname(snode* current,char* surname){
         return NULL; //error
     }
     if (!(strcmp(surname ,current->content->surname))){
-        base_out(current);
+        base_out(current,stdout);
     }
     return find_by_surname(current->next, surname);
 }
 
 
 
-void edit_book(){
+void edit_student(){
     printf("Welcome to Edit Menu\n");
     printf("write:\n");
     printf("number\n");
-    printf("name of column\n");
-    printf("value\n");
     char* number= dynstring('\n');
+    printf("name of column\n");
     char* cell = dynstring('\n');
+    printf("value\n");
     char* value = dynstring('\n');
-    snode* curr=find(root,number);
+    snode* curr = find(root,number);
     if (!strcmp("name", cell)){
         free(curr->content->name);
         curr->content->name = value;
@@ -248,17 +268,18 @@ void backup(){
     strcat(filename,"csv");
     FILE* fth1 = fopen(filename,"w");
     list(root,fth1);
-    FILE* fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\Backups.txt","a+");
+    FILE* fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\BackupsStudents.txt","a+");   //C:\Users\Timur\Desktop\Database\Backups
     fputs(filename,fth2);
     fputc('\n',fth2);
     fclose(fth1);
     fclose(fth2);
-    printf("Backup saved");
+    printf("Backup saved\n");
 }
 
 void backup_out(){
-    printf("Choose file of backup");
-    FILE* fth = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\Backups.txt","r");
+    delfullfirst(root);
+    printf("Choose file of backup\n");
+    FILE* fth = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\BackupsStudents.txt","r");
     if (fth == NULL){
         //error
     }
@@ -280,7 +301,7 @@ void backup_out(){
         //error(0);
     }
     // Open another file for writing
-    fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Students.csv", "w");
+    fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Students.csv", "w");
     if (fth2 == NULL)
     {
         printf("Cannot open file %s \n", "Students.csv");
@@ -313,8 +334,8 @@ void backup_out(){
 
 
 int main(){
-   // backup_out();
-    struct student_node* cont = (struct student_node*) malloc(sizeof(struct student_node));
+    // backup_out();
+    struct student_node* cont = (struct student_node*) malloc(sizeof(struct student_node));/*
     cont -> name= "timo" ;
     cont -> surname="mahmudov";
     cont -> patronym = "naz";
@@ -341,15 +362,22 @@ int main(){
     cont -> patronym = "naz";
     cont -> department="IU";
     cont -> facility="IU4";
-    add_first(root,"19U255",cont);
+    add_first(root,"19U255",cont);*/
+    add_student();
+    backup();
     list(root,stdout);
-    putchar('\n');
-    delfullfirst(root);
-    /*del_first(root,"19U251");
+    backup_out();
     list(root,stdout);
-    putchar('\n');
-    find(root,"19U256");
-    putchar('\n');
-    find_by_surname(root,"mahmudov");*/
+    edit_student();
+    list(root,stdout);
+    //list(root,stdout);
+    //delfullfirst(root);
+    //del_first(root,"19U251");
+    //list(root,stdout);
+    //backup();
+    //putchar('\n');
+    //find(root,"19U256");
+    //putchar('\n');
+    //find_by_surname(root,"mahmudov");
     //backup();
 }
