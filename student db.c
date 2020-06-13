@@ -18,9 +18,9 @@ struct node{
     struct node* next;
 };
 
-typedef struct node snode;
+typedef struct node xnode;
 
-snode* root = NULL;
+xnode* root = NULL;
 
 char* fdynstring(FILE* fp, char ch){
     int l = 0;
@@ -60,7 +60,7 @@ char* dynstring(char c) {
     return string;
 }
 
-void clear_snode_st(snode* node){
+void clear_xnode_st(xnode* node){
     free(node->content->surname);
     free(node->content->name);
     free(node->content->patronym);
@@ -83,14 +83,14 @@ char* timeinf(){
 }
 
 
-void add(snode* current,char* number,struct student_node* content){
+void add(xnode* current,char* number,struct student_node* content){
     if (current->next == NULL ){
-        current->next = (snode*)malloc(sizeof(snode));
+        current->next = (xnode*)malloc(sizeof(xnode));
         current->next->number = number;
         current->next->next = NULL;
         current->next->content = content;
     } else if(strcmp(number,current->next->number)<0){
-        snode* temp = (snode *)malloc(sizeof(snode));
+        xnode* temp = (xnode *)malloc(sizeof(xnode));
         temp->number=number;
         temp->content = content;
         temp->next = current->next;
@@ -104,14 +104,14 @@ void add(snode* current,char* number,struct student_node* content){
     }
 }
 
-void add_first(snode* current,char* number, struct student_node* content){
+void add_first(xnode* current,char* number, struct student_node* content){
     if (current == NULL){
-        root = (snode*)malloc(sizeof(snode));
+        root = (xnode*)malloc(sizeof(xnode));
         root->number = number;
         root->next = NULL;
         root->content = content;
     } else if (strcmp(number,current->number) < 0){
-        snode* nde = (snode*)malloc(sizeof(snode));
+        xnode* nde = (xnode*)malloc(sizeof(xnode));
         nde->number = number;
         nde->next = root;
         nde->content = content;
@@ -141,40 +141,40 @@ void add_student(){
     add_first(root,number,temp);
 }
 
-void del(snode* current,char* number){
+void del(xnode* current,char* number){
     if (strcmp(number,current->next->number)){
         del(current->next,number);
     }
-    snode* temp = current->next;
+    xnode* temp = current->next;
     current->next = current->next->next;
     free(temp);
 }
 
-void del_first(snode* current,char* number){
+void del_first(xnode* current,char* number){
     if(strcmp(current->number,number)){
         del(current,number);
     } else {
-        snode* temp = current->next;
+        xnode* temp = current->next;
         free(current);
         root = temp;
     }
 }
 
 
-void delfull(snode* current){
+void delfull(xnode* current){
     if (current == NULL){
         return;
     }
-    snode* next = current->next;
-    clear_snode_st(current);
+    xnode* next = current->next;
+    clear_xnode_st(current);
     delfull(next);
 }
-void delfullfirst(snode* current){
+void delfullfirst(xnode* current){
     delfull(current);
     root = NULL;
 }
 
-void base_out(snode* current,FILE* fth){
+void base_out(xnode* current,FILE* fth){
     fprintf(fth,"%s;",current->number);
     fprintf(fth,"%s;",current->content->surname);
     fprintf(fth,"%s;",current->content->name);
@@ -183,7 +183,7 @@ void base_out(snode* current,FILE* fth){
     fprintf(fth,"%s\n",current->content->department);
 };
 
-void list(snode* current,FILE* fth){
+void list(xnode* current,FILE* fth){
     if (current == NULL){
         return;
     }
@@ -201,18 +201,28 @@ void list(snode* current,FILE* fth){
 }
 
 
-snode* find(snode* current,char* number){
+xnode* find(xnode* current,char* number){
     if (current == NULL){
         return NULL; //error
     }
     if (!strcmp(number,current->number)){
         base_out(current,stdout);
-        return current;
+
     }
     return find(current->next,number);
 }
 
-snode* find_by_surname(snode* current,char* surname){
+xnode* find_edit(xnode* current,char* number){
+    if (current == NULL){
+        return NULL; //error
+    }
+    if (!strcmp(number,current->number)){
+        return current;
+    }
+    return find_edit(current->next,number);
+}
+
+xnode* find_by_surname(xnode* current,char* surname){
     if (current == NULL){
         return NULL; //error
     }
@@ -233,7 +243,7 @@ void edit_student(){
     char* cell = dynstring('\n');
     printf("value\n");
     char* value = dynstring('\n');
-    snode* curr = find(root,number);
+    xnode* curr = find_edit(root,number);
     if (!strcmp("name", cell)){
         free(curr->content->name);
         curr->content->name = value;
@@ -259,7 +269,7 @@ void edit_student(){
 
 void backup(){
     char* tmt = timeinf();
-    char* book = "book_";
+    char* book = "students_";
     char* flnm = "C:\\Users\\Timur\\Desktop\\Database\\Backups\\";
     char* filename = calloc(strlen(tmt) + strlen(book) + 1, 1);
     strcat(filename,flnm);
@@ -308,34 +318,44 @@ void backup_out(){
         //error();
     }
     // Read contents from file
-    while ((ch = fgetc(fth1)) != EOF) {
+    while ((ch = fgetc(fth1)) != EOF) {   //(ch = fgetc(fth1)) != EOF
         fputc(ch, fth2);
     }
-    fputc(EOF,fth2);
-    fseek(fth1,0,0);
+    //fputc(EOF,fth2);
+    //fseek(fth1,0,0);
+    printf("\nBackup successful recover\n");
+    fclose(fth1);
+    fclose(fth2);
+}
+void base_to_stack(){
+    FILE* fth1 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Students.csv","r");
     while(fgetc(fth1)!= EOF){
         fseek(fth1,-1,1);
         struct student_node* cont = (struct student_node*)malloc(sizeof(struct student_node));
         char* number = fdynstring(fth1,';');
         cont->surname = fdynstring(fth1,';');
+        //printf("\n%s\n",cont->surname);
         cont->name = fdynstring(fth1,';');
+        //printf("\n%s\n",cont->name);
         cont->patronym = fdynstring(fth1,';');
+        //printf("\n%s\n",cont->patronym);
         cont->facility = fdynstring(fth1,';');
+        //printf("\n%s\n",cont->facility);
         cont->department = fdynstring(fth1, '\n');
+        //printf("\n%s\n",cont->department);
         add_first(root,number,cont);
     }
-    printf("\nBackup successful recover\n");
-    fclose(fth1);
-    fclose(fth2);
 }
-
 
 
 
 
 int main(){
     // backup_out();
-    struct student_node* cont = (struct student_node*) malloc(sizeof(struct student_node));/*
+
+
+
+    /*struct student_node* cont = (struct student_node*) malloc(sizeof(struct student_node));
     cont -> name= "timo" ;
     cont -> surname="mahmudov";
     cont -> patronym = "naz";
@@ -350,7 +370,7 @@ int main(){
     cont -> facility="IU4";
     cont = (struct student_node*) malloc(sizeof(struct student_node));
     add_first(root,"19U251",cont);
-    cont -> name= "ktimo" ;
+    cont -> name = "ktimo" ;
     cont -> surname="mahmudov";
     cont -> patronym = "naz";
     cont -> department="IU";
@@ -363,13 +383,13 @@ int main(){
     cont -> department="IU";
     cont -> facility="IU4";
     add_first(root,"19U255",cont);*/
-    add_student();
-    backup();
-    list(root,stdout);
-    backup_out();
-    list(root,stdout);
-    edit_student();
-    list(root,stdout);
+      //add_student();
+      //backup();
+      //list(root,stdout);
+      //backup_out();
+      //list(root,stdout);
+      //edit_student();
+      //list(root,stdout);
     //list(root,stdout);
     //delfullfirst(root);
     //del_first(root,"19U251");
