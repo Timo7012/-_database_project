@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<time.h>
+
 
 struct book_node{
     char* author;
@@ -15,11 +17,11 @@ struct node{
     struct node* next;
 };
 
-typedef struct node snode;
+typedef struct node xnode;
 
-snode* root = NULL;
+xnode* root = NULL;
 
-void clear_snode(snode* node){
+void clear_xnode_bk(xnode* node){
     free(node->content->author);
     free(node->content->name_of_book);
     free(node->content);
@@ -43,15 +45,52 @@ char* dynstring(char c) {
     return string;
 }
 
+char* fdynstring(FILE* fp, char ch){
+    int l = 0;
+    char buf;
+    for(;(buf = fgetc(fp)) != ch && buf != EOF; ++l);
+    if (buf == EOF)
+        fseek(fp, -1*(l), SEEK_CUR);
+    else if (buf =='\n')
+        fseek(fp, -1*(l+2), SEEK_CUR);
+    else
+        fseek(fp, -1*(l+1), SEEK_CUR);
+    char* a = (char*)malloc((l + 1) * sizeof(char));
+    for (int i = 0; i < l; ++i)
+        a[i]=fgetc(fp);
+    a[l] = '\0';
+    if (buf != EOF)
+        fgetc(fp);
+    else
+        fseek(fp, -1, 2);
+    return a;
+}
 
-void add(snode* current,int isbn,struct book_node* content){
-    if (current->next == NULL && isbn != current->isbn){
-        current->next = (snode*)malloc(sizeof(snode));
+
+char* timeinf(){
+    const time_t timer = time(NULL);
+    char* tm =(char*)malloc(21*sizeof(char));
+    struct tm* timeinf = localtime(&timer);
+    strftime (tm,21,"%d_%m_%Y_%H.%M.%S.",timeinf);
+    //printf("%s\n",tm);
+    return tm;
+}
+
+
+void add(xnode* current,int isbn,struct book_node* content){
+    if (current->next == NULL ){
+        current->next = (xnode*)malloc(sizeof(xnode));
         current->next->isbn = isbn;
         current->next->next = NULL;
         current->next->content = content;
+    } else if(strcmp(isbn,current->next->isbn)<0){
+        xnode* temp = (xnode *)malloc(sizeof(xnode));
+        temp->isbn=isbn;
+        temp->content = content;
+        temp->next = current->next;
+        current->next = temp;
     } else {
-        if (isbn != current->isbn){
+        if (strcmp(isbn,current->next->isbn)){
             add(current->next, isbn, content);
         } else {
             current->content = content;
@@ -59,74 +98,110 @@ void add(snode* current,int isbn,struct book_node* content){
     }
 }
 
-void add_first(snode* current,int isbn, struct book_node* content){
+void add_first(xnode* current, int isbn, struct book_node* content){
     if (current == NULL){
-        root = (snode*)malloc(sizeof(snode));
+        root = (xnode*)malloc(sizeof(xnode));
         root->isbn = isbn;
         root->next = NULL;
         root->content = content;
-    } else if (isbn != current->isbn){
+    } else if (strcmp(isbn,current->isbn) < 0){
+        xnode* nde = (xnode*)malloc(sizeof(xnode));
+        nde->isbn = isbn;
+        nde->next = root;
+        nde->content = content;
+        root = nde;
+    } else if (strcmp(isbn,current->isbn)){
         add(current, isbn, content);
     } else {
         current->content = content;
     }
 }
 
-void del(snode* current,int isbn){
+void del(xnode* current,int isbn){
     if (isbn != current->next->isbn){
         del(current->next,isbn);
     }
-    snode* temp = current->next;
+    xnode* temp = current->next;
     current->next = current->next->next;
     free(temp);
 }
 
-void del_first(snode* current,int isbn){
+void del_first(xnode* current,int isbn){
     if(current->isbn != isbn){
         del(current,isbn);
     } else {
-        snode* temp = current->next;
+        xnode* temp = current->next;
         free(current);
         root = temp;
     }
 }
 
-void list(snode* current,FILE* fth){
+void delfull(xnode* current){
+    if (current == NULL){
+        return;
+    }
+    xnode* next = current->next;
+    clear_xnode_bk(current);
+    delfull(next);
+}
+void delfullfirst(xnode* current){
+    delfull(current);
+    root = NULL;
+}
+
+void base_out(xnode* current,FILE* fth){
+    fprintf(fth,"%d;",current->isbn);
+    fprintf(fth,"%s;",current->content->author);
+    fprintf(fth,"%s;",current->content->name_of_book);
+    fprintf(fth,"%d;",current->content->all);
+    fprintf(fth,"%d\n",current->content->available);
+};
+
+void list(xnode* current,FILE* fth){
     if (current == NULL){
         return;
     }
     if (fth == NULL){
         return; //error
     }
-
-    fprintf(fth,"%d\n",current->isbn);
+    base_out(root,stdout);
     list(current->next, fth);
 }
 
 
-snode* find(snode* current,int isbn){
+xnode* find(xnode* current,char* number){
     if (current == NULL){
         return NULL; //error
     }
-    if (isbn == current->isbn){
-        return current;
+    if (!strcmp(number,current->isbn)){
+        base_out(current,stdout);
+
     }
-    return find(current->next,isbn);
+    return find(current->next,number);
 }
 
-
-snode* find_by_author(snode* current,char* author){
+xnode* find_edit(xnode* current,char* number){
     if (current == NULL){
         return NULL; //error
     }
-    if (!(strcmp(author ,current->content->author))){
+    if (!strcmp(number,current->isbn)){
         return current;
     }
-    return find_by_author(current->next, author);
+    return find_edit(current->next,number);
+}
+
+xnode* find_by_surname(xnode* current,char* surname){
+    if (current == NULL){
+        return NULL; //error
+    }
+    if (!(strcmp(surname ,current->content->author))){
+        base_out(current,stdout);
+    }
+    return find_by_surname(current->next, surname);
 }
 
 //--book
-void give_book(snode* current, int isbn){
+void give_book(xnode* current, int isbn){
     if (current == NULL){
         return; //error
     }
@@ -138,7 +213,7 @@ void give_book(snode* current, int isbn){
 }
 
 //++book
-void bring_book (snode* current, int isbn){
+void bring_book (xnode* current, int isbn){
     if (current == NULL){
         return; //error
     }
@@ -155,7 +230,7 @@ void edit_book(){
     int isbn = atoi(dynstring('\n'));
     char* cell = dynstring('\n');
     char* value = dynstring('\n');
-    snode* curr=find(root,isbn);
+    xnode* curr=find_edit(root,isbn);
     if (!strcmp("author", cell)){
         free(curr->content->author);
         curr->content->author = value;
@@ -166,13 +241,101 @@ void edit_book(){
         curr->content->all = atoi(value);
     } else if (!strcmp("available", cell)) {
         curr->content->available = atoi(value);
+    } else {
+        //10/5 chertovikh errorov
     }
 
+}
+
+
+void backup(){
+    char* tmt = timeinf();
+    char* book = "book_";
+    char* flnm = "C:\\Users\\Timur\\Desktop\\Database\\Backups\\";
+    char* filename = calloc(strlen(tmt) + strlen(book) + 1, 1);
+    strcat(filename,flnm);
+    strcat(filename,book);
+    strcat(filename,tmt);
+    strcat(filename,"csv");
+    FILE* fth1 = fopen(filename,"w");
+    list(root,fth1);
+    FILE* fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\BackupsLibrary.txt","a+");   //C:\Users\Timur\Desktop\Database\Backups
+    fputs(filename,fth2);
+    fputc('\n',fth2);
+    fclose(fth1);
+    fclose(fth2);
+    printf("Backup saved\n");
+}
+
+void backup_out(){
+    delfullfirst(root);
+    printf("Choose file of backup\n");
+    FILE* fth = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\BackupsLibrary.txt","r");
+    if (fth == NULL){
+        //error
+    }
+    char ch;
+    while((ch = getc(fth)) != EOF){
+        putchar(ch);
+    }
+    fclose(fth);
+    char* string = dynstring('\n');
+    char* way = "C:\\Users\\Timur\\Desktop\\Database\\Backups\\";
+    char* str_bck = calloc(strlen(way) + strlen(string) + 1, 1);
+    strcat(str_bck,way);
+    strcat(str_bck,string);
+    FILE *fth1, *fth2;
+    // Open one file for reading
+    fth1 = fopen(str_bck, "r");
+    if (fth1 == NULL){
+        printf("Cannot open file %s \n", str_bck);
+        //error(0);
+    }
+    // Open another file for writing
+    fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Library.csv", "w");
+    if (fth2 == NULL)
+    {
+        printf("Cannot open file %s \n", "Library.csv");
+        //error();
+    }
+    // Read contents from file
+    while ((ch = fgetc(fth1)) != EOF) {   //(ch = fgetc(fth1)) != EOF
+        fputc(ch, fth2);
+    }
+    //fputc(EOF,fth2);
+    //fseek(fth1,0,0);
+    printf("\nBackup successful recover\n");
+    fclose(fth1);
+    fclose(fth2);
+}
+
+void base_to_stack(){
+    FILE* fth1 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Library.csv","r");
+    while(fgetc(fth1)!= EOF){
+        fseek(fth1,-1,1);
+        struct book_node* cont = (struct book_node*)malloc(sizeof(struct book_node));
+        //char* isbn = fdynstring(fth1,';');
+        cont->author = fdynstring(fth1,';');
+        //printf("\n%s\n",cont->surname);
+        cont->name_of_book = fdynstring(fth1,';');
+        //printf("\n%s\n",cont->name);
+        cont->all = fdynstring(fth1,';');
+        //printf("\n%s\n",cont->patronym);
+        cont->available = fdynstring(fth1,';');
+        //printf("\n%s\n",cont->facility);
+        add_first(root,isbn,cont);
+    }
 }
 
 
 
 
 int main() {
+
     
 }
+
+
+
+
+
