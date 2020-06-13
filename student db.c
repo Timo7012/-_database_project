@@ -1,4 +1,4 @@
-#include <stdio.h>
+   #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
@@ -70,8 +70,6 @@ void clear_xnode_st(xnode* node){
     free(node->content);
     free(node);
 }
-
-
 
 char* timeinf(){
     const time_t timer = time(NULL);
