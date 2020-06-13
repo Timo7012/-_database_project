@@ -11,27 +11,40 @@ int main(int argc, char* argv[]) {
         FILE* data_base = open_file(argv[argc-1]);
         for (int i=1; i<(argc-1);++i) // Processing of parameters
     }
-
-
-
     return 0;
 }
 
 
 
 void help() {
-    printf("*Commands*\n");
+    printf("*Commands for library database*\n");
     printf("_________________________________________________________________\n");
     printf("add_book                                   Add book to library\n"); 
     printf("del_book                                   Delete book from library\n");
     printf("get_book                                   Get book from library and adds book to student\n");
     printf("bring_book                                 Adds count of book to library and delete book from student\n");
-    printf("list_book                                  Shows all books in library\n"); // sorted ny ISBN
+    printf("list_books                                 Shows all books in library\n"); // sorted ny ISBN
     printf("change_count_book_isbn                     Change count of book to library by ISBN \n");
-    printf("backup                                     Save the data of library in backup file\n");
-    printf("open_backup                                Open backup version of library\n");
-    printf("search_book_author                         Search books by athor surname\n");
-    printf("exit_library                               Save and close file of library\n\n");
+    printf("backup_library                             Save the data of library in backup file\n");
+    printf("open_backup_library                        Open backup version of library\n");
+    printf("exit_library_db                            Save and close file of library\n\n");
+    printf("----------Example for initializing programme--------\n");
+    printf("Project_database your_file.csv \n");
+    printf("----------Example for initializing programme--------\n\n");
+    printf("_________________________________________________________________");
+    
+    
+    printf("*Commands for student database*\n");
+    printf("_________________________________________________________________\n");
+    printf("add_student                                Add student to database\n"); 
+    printf("del_student                                Delete student from database\n");
+    printf("find_student                               Get student from database by number\n");
+    printf("find_students_by_surname                   Get student from database by surname\n");
+    printf("list_students                              Shows all students in database\n"); // sorted ny number
+    printf("edit_student                               Change count of book to library by ISBN \n");
+    printf("backup_student                             Save the data of students database in backup file\n");
+    printf("open_backup_student                        Open backup version of students database\n");
+    printf("exit_student_db                            Save and close file of student database\n\n");
     printf("----------Example for initializing programme--------\n");
     printf("Project_database your_file.csv \n");
     printf("----------Example for initializing programme--------\n\n");
@@ -42,15 +55,26 @@ void help() {
 void error_code (int a){
 
     switch  (a) {
-        case 1 : printf("File not be opened\n"); exit(0);
-
-        case 2 : printf("File not indicated\n"); help(); exit(0);
-
-        case 3 : printf("Logger error\n"); exit(0);
-
-        case 4 : printf("Wrong login or password\n"); exit(0);
-
-        case 5 : printf("File not be opened\n"); exit(0);
+        case 1 : printf("ERROR: File not be opened\n"); exit(0);
+        case 2 : printf("ERROR: File not indicated\n"); help(); exit(0);
+        case 3 : printf("ERROR: Logger error\n"); exit(0);
+        case 4 : printf("ERROR: Wrong login or password\n"); exit(0);
+        case 5 : printf("ERROR: File not be opened\n"); exit(0);
+        case :   printf("ERROR: Can't add the book\n"); exit(0);
+        case :   printf("ERROR: Can't delete the book\n"); exit(0);
+        case :   printf("ERROR: Can't get the book\n"); exit(0);
+        case :   printf("ERROR: Can't bring the book\n"); exit(0);
+        case :   printf("ERROR: Can't change count of book \n"); exit(0);
+        case :   printf("ERROR: Can't create backup the library database \n"); exit(0);
+        case :   printf("ERROR: Can't open backup of library\n"); exit(0);
+        case :   printf("ERROR: Can't add the student\n"); exit(0);
+        case :   printf("ERROR: Can't delete the student\n"); exit(0);
+        case :   printf("ERROR: Can't find student by number\n"); exit(0);
+        case :   printf("ERROR: Can't find students by surname\n"); exit(0);
+        case :   printf("ERROR: Can't edit the student \n"); exit(0);
+        case :   printf("ERROR: Can't backup the students database \n"); exit(0);
+        case :   printf("ERROR: Can't open backup of students database \n"); exit(0);
+        case :   printf("\n"); exit(0);
     }
 }
 
@@ -60,4 +84,3 @@ FILE* open_file(const char* argv[]){
         error_code(1);
     }
 }
-
