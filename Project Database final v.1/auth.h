@@ -9,8 +9,8 @@
 
 
 
-int auth() {
-    FILE *fth = fopen("C:\\Users\\Timur\\Desktop\\logins.txt", "r");
+int auth(char ** log) {
+    FILE *fth = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Accounts.csv", "r");
     if (fth == NULL) {
         //error
         return 0;
@@ -43,9 +43,10 @@ int auth() {
     }
     if (!rights) {
         return 22;
-    } else {printf("\nGOD");}
-    // rights in template
+    } else {printf("\nGOD\n");}
     fclose(fth);
+    free(password);
+    *log = login;
     return rights;
 }
 

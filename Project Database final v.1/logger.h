@@ -7,11 +7,12 @@
 #include <time.h>
 #include <windows.h>
 
-void logger_book(FILE* fth, int code, char* login){
+void logger_book(int code, char* login){
+    FILE* fth = fopen("C:\\Users\\Timur\\Desktop\\Database\\logger.log","a+");
     char* time = timeinf();
-    fprintf(fth, "{\t\"time\" = %s\";\t\"login\" = \"%s\";\t\"operation\" = \"", time,login);
+    fprintf(fth, "{\"time\" = %s\";\"login\" = \"%s\";\"operation\" = \"", time,login);
     switch (code) {
-        case 0:  fputs("Entered in the library\"}",fth);  break; //Auth accepted
+        case 0:  fputs("Entered in the system\"}",fth);  break; //Auth accepted
         case 1:  fputs("Add book to the library \"}",fth); break;
         case 2:  fputs("Delete's book from the library\"}",fth); break;
         case 3:  fputs("Edit's book in library\"}",fth); break;
@@ -23,18 +24,23 @@ void logger_book(FILE* fth, int code, char* login){
         case 9:  fputs("Exit from library\"}",fth); break;
         case 10: fputs("Get book from library\"}",fth); break;
         case 11: fputs("Bring book in library\"}",fth); break;
+        case 12: fputs("User logged out\"}",fth); break;
+        case 13: fputs("Change count of books\"}",fth); break;
+        case 14: fputs("Search books by ISBN\"}",fth); break;
+        case 15: fputs("Exit from the library\"}",fth);
         default:break;
     }
-    fprintf(fth, "\"\n");
+    fprintf(fth, "\n");
     free(time);
+    fclose(fth);
 }
 
 
-void logger_student(FILE* fth, int code, char* login){
+void logger_student(int code, char* login){
+    FILE* fth = fopen("C:\\Users\\Timur\\Desktop\\Database\\logger.log","a+");
     char* time = timeinf();
-    fprintf(fth, "{\t\"time\" = %s\";\t\"login\" = \"%s\";\t\"operation\" = \"", time,login);
+    fprintf(fth, "{\"time\" = %s\";\"login\" = \"%s\";\"operation\" = \"", time,login);
     switch (code) {
-        case 0:  fputs("Entered in the student database\"}",fth);  break; //Auth accepted
         case 1:  fputs("Add student in database \"}",fth); break;
         case 2:  fputs("Delete's student from database\"}",fth); break;
         case 3:  fputs("Edit's information about student in database\"}",fth); break;
@@ -43,10 +49,12 @@ void logger_student(FILE* fth, int code, char* login){
         case 6:  fputs("Backups the library\"}",fth); break;
         case 7:  fputs("Open library backup\"}",fth); break;
         case 8:  fputs("Exit from student database\"}",fth); break;
+        case 9:  fputs("Search students by number\"}",fth); break;
         default:break;
     }
-    fprintf(fth, "\"\n");
+    fprintf(fth, "\n");
     free(time);
+    fclose(fth);
 }
 
 #endif //LOGGER_LIBRARY_H
