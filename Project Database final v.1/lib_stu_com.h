@@ -118,6 +118,9 @@ void del_lb(bknode* current,int isbn){
     if (isbn != current->next->isbn){
         del_lb(current->next,isbn);
     }
+    else {
+        error_code (7);
+    }
     bknode* temp = current->next;
     current->next = current->next->next;
     free(temp);
@@ -126,8 +129,10 @@ void del_lb(bknode* current,int isbn){
 comnode* find_by_isbn(comnode* ,int);
 
 void del_first_lb(bknode* current,int isbn){
-    if (find_by_isbn(rootC, isbn) != NULL)
-        //error
+    if (find_by_isbn(rootC, isbn) != NULL){
+        error_code(7);
+    }
+
     if (current == NULL){
         return;
     }
@@ -154,6 +159,7 @@ void delfullfirst_lb(bknode* current){
 }
 
 void base_out_lb(bknode* current,FILE* fth){
+    printf("%d;",current->isbn);
     fprintf(fth,"%d;",current->isbn);
     fprintf(fth,"%s;",current->content->author);
     fprintf(fth,"%s;",current->content->name_of_book);
@@ -166,6 +172,7 @@ void list_lb(bknode* current,FILE* fth){
         return;
     }
     if (fth == NULL){
+        printf("fth is null\n");
         return; //error
     }
     base_out_lb(current,fth);
@@ -209,7 +216,8 @@ void add_first_com(comnode*,int, char*,char*);
 //--book
 void give_book(bknode* current, int isbn,char* number,char* date) {
     if (current == NULL) {
-        return; //error
+        return;
+        error_code(8);
     }
     current = find_edit_lb(current, isbn);
     if (current->content->available != 0) {
@@ -276,15 +284,17 @@ void edit_book(){
 
 
 void backup_lb(){
-    char* tmt = timeinf();
+    char* tmt = timeinf_file();
     char* book = "book_";
     char* flnm = "C:\\Users\\Timur\\Desktop\\Database\\Backups\\";
-    char* filename = calloc(strlen(tmt) + strlen(book) + 1, 1);
+    char* filename = calloc(strlen(tmt) + strlen(book) + strlen(flnm) + 3, 1);
     strcat(filename,flnm);
     strcat(filename,book);
     strcat(filename,tmt);
     strcat(filename,"csv");
-    FILE* fth1 = fopen(filename,"w");
+    printf("%s\n",filename);
+    FILE* fth1 = fopen(filename,"w+");
+    list_lb(root,stdout);
     list_lb(root,fth1);
     FILE* fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\BackupsLibrary.txt","a+");   //C:\Users\Timur\Desktop\Database\Backups
     fputs(filename,fth2);
@@ -353,8 +363,8 @@ void base_to_stack_lb(){
         cont->available = atoi(fdynstring(fth1,'\n'));
         //printf("\n%s\n",cont->facility);
         add_first_lb(root,atoi(isbn),cont);
-        fclose(fth1);
     }
+    fclose(fth1);
 }
 
 
@@ -362,7 +372,7 @@ void exit_lb(){
     if (root == NULL){
         //error
     }
-    FILE* fth1 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Library.csv","w");
+    FILE* fth1 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Library.csv","w+");
     list_lb(root,fth1);
     fclose(fth1);
     printf("\nLibrary database saved and closed\n");
@@ -527,12 +537,14 @@ void delfullfirst(snode* current){
 }
 
 void base_out_st(snode* current,FILE* fth){
+    printf("*%s;*",current->number);
     fprintf(fth,"%s;",current->number);
     fprintf(fth,"%s;",current->content->surname);
     fprintf(fth,"%s;",current->content->name);
     fprintf(fth,"%s;",current->content->patronym);
     fprintf(fth,"%s;",current->content->facility);
     fprintf(fth,"%s\n",current->content->department);
+
 };
 
 void list_st(snode* current,FILE* fth){
@@ -614,15 +626,15 @@ void edit_student(){
 
 
 void backup_st(){
-    char* tmt = timeinf();
-    char* book = "students_";
+    char* tmt = timeinf_file();
+    char* student = "students_";
     char* flnm = "C:\\Users\\Timur\\Desktop\\Database\\Backups\\";
-    char* filename = calloc(strlen(tmt) + strlen(book) + 1, 1);
+    char* filename = calloc(strlen(tmt) + strlen(student) + strlen(flnm)+4, sizeof(char));
     strcat(filename,flnm);
-    strcat(filename,book);
+    strcat(filename,student);
     strcat(filename,tmt);
     strcat(filename,"csv");
-    FILE* fth1 = fopen(filename,"w");
+    FILE* fth1 = fopen(filename,"a+");
     list_st(rootS,fth1);
     FILE* fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Backups\\BackupsStudents.txt","a+");   //C:\Users\Timur\Desktop\Database\Backups
     fputs(filename,fth2);
@@ -654,10 +666,10 @@ void backup_out_st(){
     fth1 = fopen(str_bck, "r");
     if (fth1 == NULL){
         printf("Cannot open file %s \n", str_bck);
-        //error(0);
+        error_code(1);
     }
     // Open another file for writing
-    fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Students.csv", "w");
+    fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Students.csv", "w+");
     if (fth2 == NULL)
     {
         printf("Cannot open file %s \n", "Students.csv");
@@ -667,8 +679,6 @@ void backup_out_st(){
     while ((ch = fgetc(fth1)) != EOF) {   //(ch = fgetc(fth1)) != EOF
         fputc(ch, fth2);
     }
-    //fputc(EOF,fth2);
-    //fseek(fth1,0,0);
     printf("\nBackup successful recover\n");
     fclose(fth1);
     fclose(fth2);
@@ -699,7 +709,7 @@ void exit_st(){
     if (rootS == NULL){
         //error
     }
-    FILE* fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Students.csv", "w");
+    FILE* fth2 = fopen("C:\\Users\\Timur\\Desktop\\Database\\Databases\\Students.csv", "w+");
     list_st(rootS,fth2);
     fclose(fth2);
     printf("\nStudents database saved and closed\n");
@@ -742,7 +752,7 @@ void find_student(){
 void find_students_by_surname(){
     printf("Type surname of students: ");
     char* string = dynstring('\n');
-    find_by_surname(root,string);
+    find_by_surname(rootS,string);
 }
 //----------func for command getter----------
 
@@ -875,7 +885,7 @@ void print_students_by_isbn(comnode* current, int isbn){
     comnode* temp = find_by_isbn(current, isbn);
     if (temp == NULL)
         return;
-    printf("\n%s;%s;%s;%s\n", current->student->number, current->student->content->surname, current->student->content->name,current->student->content->department,current->date);
+    printf("\n%s;%s;%s;%s;%s\n", current->student->number, current->student->content->surname, current->student->content->name,current->student->content->department,current->date);
     print_students_by_isbn(current->next, isbn);
 }
 

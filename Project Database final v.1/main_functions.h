@@ -76,12 +76,11 @@ void error_code (int a){
 
     switch  (a) {
         case  1: printf("ERROR: File not be opened\n"); exit(0);
-        case  2: printf("ERROR: File not indicated\n"); exit(0);
         case  3: printf("ERROR: Logger error\n"); exit(0);
         case  4: printf("ERROR: Wrong login or password\n"); exit(0);
         case  5: printf("ERROR: File not be opened\n"); exit(0);
         case  6: printf("ERROR: Can't add the book\n"); exit(0);
-        case  7: printf("ERROR: Can't delete the book\n"); exit(0);
+        case  7: printf("ERROR: Can't delete the book\n");
         case  8: printf("ERROR: Can't get the book\n"); exit(0);
         case  9: printf("ERROR: Can't bring the book\n"); exit(0);
         case 10: printf("ERROR: Can't change count of book \n"); exit(0);
@@ -97,8 +96,17 @@ void error_code (int a){
         case 20: printf("ERROR: Enter wrong command\n"); exit(0);
         case 21: printf("ERROR: Number is already exists\n"); exit(0);
         case 22: printf("ERROR: ISBN is already exists\n"); exit(0);
+        case 23: printf("ERROR: You dont have rights\n"); exit(0);
         default: printf("ERROR: Fatal error\n"); exit(0);
     }
 }
+
+int psdodate(char* a){
+    int year = (a[6]-'0')*1000+(a[7]-'0')*100+(a[8]-'0')*10+(a[9]-'0');
+    int day = (a[0])*10 +a[1];
+    int month = (a[3])*10 +a[4];
+    return  year*10000+month*100+day;
+}
+
 
 #endif //MAIN_FUNCTIONS_LIBRARY_H

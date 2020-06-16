@@ -27,8 +27,8 @@ void logger_book(int code, char* login){
         case 12: fputs("User logged out\"}",fth); break;
         case 13: fputs("Change count of books\"}",fth); break;
         case 14: fputs("Search books by ISBN\"}",fth); break;
-        case 15: fputs("Exit from the library\"}",fth);
-        default:break;
+        case 15: fputs("Exit from the library\"}",fth); break;
+        default:error_code(3);break;
     }
     fprintf(fth, "\n");
     free(time);
@@ -50,7 +50,7 @@ void logger_student(int code, char* login){
         case 7:  fputs("Open library backup\"}",fth); break;
         case 8:  fputs("Exit from student database\"}",fth); break;
         case 9:  fputs("Search students by number\"}",fth); break;
-        default:break;
+        default:error_code(3);break;
     }
     fprintf(fth, "\n");
     free(time);

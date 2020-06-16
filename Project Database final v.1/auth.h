@@ -35,14 +35,14 @@ int auth(char ** log) {
                 //printf("\nrights: %d ", rights);
                 break;
             } else {
-                //error_code(4)
+                error_code(4);
             }
         } else {
             while ((temp = fgetc(fth)) != '\n' && temp != EOF);
         }
     }
     if (!rights) {
-        return 22;
+        error_code(23);
     } else {printf("\nGOD\n");}
     fclose(fth);
     free(password);
